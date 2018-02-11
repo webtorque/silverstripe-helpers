@@ -1,0 +1,43 @@
+{
+    "name": "webtorque/silverstripe-helpers",
+    "description": "Simple utilities WebTorque uses in its based SS4 projects.",
+    "type": "silverstripe-vendormodule",
+    "license": "MIT",
+    "require": {
+        "php": ">=7.0.0",
+        "silverstripe/framework": "^4",
+        "silverstripe/vendor-plugin": "^1.0",
+        "dnadesign/silverstripe-elemental": "2.x-dev",
+        "silvershop/silverstripe-hasonefield": "2.*",
+        "symbiote/silverstripe-gridfieldextensions": "^3.1",
+        "jonom/focuspoint": "3.x-dev",
+        "silverstripe/blog": "3.*",
+        "tractorcow/silverstripe-colorpicker": "^4@dev"
+    },
+    "require-dev": {
+        "phpunit/PHPUnit": "^5.7",
+        "silverstripe/sqlite3": "^2"
+    },
+    "autoload": {
+        "psr-4": {
+            "WebTorque\\SilverstripeHelpers\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "WebTorque\\SilverstripeHelpers\\Tests\\": "tests/",
+            "WebTorque\\SilverstripeHelpers\\Tests\\Mocks\\": "mocks/"
+        },
+        "files": ["mocks/class_alias.php"]
+    },
+    "config": {
+        "process-timeout": 600
+    },
+    "scripts": {
+        "lint": "phpcs src/ tests/",
+        "localTest": "DB=SQLITE vendor/bin/phpunit"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "suggest": { }
+}
