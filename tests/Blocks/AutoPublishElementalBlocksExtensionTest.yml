@@ -1,0 +1,23 @@
+
+DNADesign\Elemental\Models\ElementalArea:
+  area1:
+    Title: Area 1
+
+
+
+WebTorque\SilverstripeHelpers\Tests\Mocks\DummyPage:
+  page1:
+    Title: Page 1
+    URLSegment: test-page
+    ElementalAreaID: =>DNADesign\Elemental\Models\ElementalArea.area1
+
+
+WebTorque\SilverstripeHelpers\Tests\Mocks\DummyElement:
+  element1:
+    Title: Element 1
+    TestValue: 'Hello Test'
+    ParentID: =>DNADesign\Elemental\Models\ElementalArea.area1
+  element2:
+    Title: Element 2
+    TestValue: 'Hello Test 2'
+    ParentID: =>DNADesign\Elemental\Models\ElementalArea.area1

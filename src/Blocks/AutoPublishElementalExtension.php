@@ -1,8 +1,9 @@
 <?php
 
-namespace WebTorque\SilverstripeHelpers\Tests\Blocks;
+namespace WebTorque\SilverstripeHelpers\Blocks;
 
 use SilverStripe\ORM\DataExtension;
+use SilverStripe\Versioned\Versioned;
 
 
 /**
@@ -23,7 +24,43 @@ class AutoPublishElementalExtension extends DataExtension
      */
     public function onAfterWrite(): void
     {
+        // If current page is a draft or if auto-publishing is disable, quit right away.
+        $liveID = Versioned::get_versionnumber_by_stage($this->getOwner(), Versioned::LIVE, $this->getOwner()->ID);
+        if ($this->getOwner()->Version != $liveID  || $this->getAutoPublishElementalDisable()) {
+            return;
+        }
+        echo "After write\n";
 
+        $fields = $this->getAutoPublishElementalFields();
+        foreach ($fields as $fieldName) {
+            $this->autopublish($fieldName);
+        }
+    }
+
+    /**
+     * Given a field name, attempt to autopublish all child elements.
+     * @param  string $fieldName
+     */
+    private function autopublish(string $fieldName): void
+    {
+        // If the method doesn't exist, just quit.
+        var_dump($fieldName);
+        var_dump($this->getOwner()->HasMethod($fieldName));
+        if (!$this->getOwner()->HasMethod($fieldName)) {
+            return;
+        }
+
+        $elementArea = $this->getOwner()->{$fieldName}();
+        $elementArea = $this->getOwner()->ElementalArea();
+
+        if ($elementArea) {
+            $elements = $elementArea->Elements();
+            foreach ($elements as $element) {
+                echo "publishing element";
+                $element->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
+            }
+        }
+        die();
     }
 
     /**
@@ -45,8 +82,9 @@ class AutoPublishElementalExtension extends DataExtension
     }
 
     /**
-     * [getAutoPublishElementalDisable description]
-     * @return bool [description]
+     * Get whatever auto publishing should be disable for this class based off the `auto_publish_elemental_disable`
+     * config flag. Default to false.
+     * @return bool
      */
     public function getAutoPublishElementalDisable(): bool
     {
@@ -54,6 +92,5 @@ class AutoPublishElementalExtension extends DataExtension
             $this->getOwner()->config()->get('auto_publish_elemental_disable') ?
             true : false;
     }
-
 
 }
