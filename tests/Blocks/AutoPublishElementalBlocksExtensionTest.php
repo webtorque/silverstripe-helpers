@@ -3,20 +3,20 @@ namespace WebTorque\SilverstripeHelpers\Tests\Blocks;
 
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Versioned\Versioned;
-use WebTorque\SilverstripeHelpers\Tests\Mocks\{DummyPage,DummyElement};
+use WebTorque\SilverstripeHelpers\Tests\Mocks\DummyPage;
+use WebTorque\SilverstripeHelpers\Tests\Mocks\DummyElement;
 use WebTorque\SilverstripeHelpers\Blocks\AutoPublishElementalExtension;
 use DNADesign\Elemental\Models\ElementalArea;
 
-
 class AutoPublishElementalBlocksExtensionTest extends SapphireTest
 {
-
     protected static $fixture_file = 'AutoPublishElementalBlocksExtensionTest.yml';
 
     /**
      * Make sure AutoPublishElementalFields default to `ElementalArea`.
      */
-    public function testAutoPublishElementalFields() {
+    public function testAutoPublishElementalFields()
+    {
         $config = DummyPage::config();
 
         // Make sure AutoPublishElementalFields defaults to `['ElementalArea']`
@@ -45,7 +45,8 @@ class AutoPublishElementalBlocksExtensionTest extends SapphireTest
     /**
      * Make sure AutoPublishElementalFields default to `ElementalArea`.
      */
-    public function testAutoPublishElementalDisable() {
+    public function testAutoPublishElementalDisable()
+    {
         $config = DummyPage::config();
 
         // Make sure AutoPublishElementalDisable defaults to false
@@ -61,8 +62,12 @@ class AutoPublishElementalBlocksExtensionTest extends SapphireTest
 
     public function testOnAfterPublish()
     {
-        $area = $this->objFromFixture(ElementalArea::class, 'area1');
-        $area->write();
+        // Make sure all our object are fully saved to the DB
+        $this->objFromFixture(DummyElement::class, 'element1')->write();
+        $this->objFromFixture(DummyElement::class, 'element2')->write();
+        $this->objFromFixture(ElementalArea::class, 'area1')->write();
+        $page = $this->objFromFixture(DummyPage::class, 'page1')->write();
+        $page = $this->objFromFixture(DummyPage::class, 'page1');
 
         // Make sure our element has a published version
         $block = $this->objFromFixture(DummyElement::class, 'element1');
@@ -80,15 +85,18 @@ class AutoPublishElementalBlocksExtensionTest extends SapphireTest
 
         // Publish the parent page
         $page = $this->objFromFixture(DummyPage::class, 'page1');
-        echo "\nabout to copy version\n";
+        var_dump(ElementalArea::singleton()->baseTable());
         $page->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE, false);
 
         // Publishing the Parent page should have published the blocks underneat it
+        var_dump(ElementalArea::get()->Count());
+        die();
+
         $live = Versioned::get_versionnumber_by_stage(DummyElement::class, 'Live', $block->ID);
         $draft = Versioned::get_versionnumber_by_stage(DummyElement::class, 'Stage', $block->ID);
         $this->assertEquals($live, $draft, "The Elemental block should have been published with its parent page.");
 
-    //     $thirdVersion = Versioned::get_latest_version(VersionedTest\TestObject::class, $page1->ID)->Version;
+        //     $thirdVersion = Versioned::get_latest_version(VersionedTest\TestObject::class, $page1->ID)->Version;
     //     $liveVersion = Versioned::get_versionnumber_by_stage(VersionedTest\TestObject::class, 'Live', $page1->ID);
     //     $stageVersion = Versioned::get_versionnumber_by_stage(VersionedTest\TestObject::class, 'Stage', $page1->ID);
     //

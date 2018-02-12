@@ -2,6 +2,10 @@
 DNADesign\Elemental\Models\ElementalArea:
   area1:
     Title: Area 1
+  area2:
+    Title: Area 2
+  area3:
+    Title: Area 3
 
 
 

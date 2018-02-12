@@ -4,7 +4,8 @@ namespace WebTorque\SilverstripeHelpers\Blocks;
 
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\Versioned\Versioned;
-
+use DNADesign\Elemental\Models\ElementalArea;
+use WebTorque\SilverstripeHelpers\Tests\Mocks\DummyPage;
 
 /**
  * Extends a SiteTree to auto publish all its elemental blocks when the it's published.
@@ -29,7 +30,6 @@ class AutoPublishElementalExtension extends DataExtension
         if ($this->getOwner()->Version != $liveID  || $this->getAutoPublishElementalDisable()) {
             return;
         }
-        echo "After write\n";
 
         $fields = $this->getAutoPublishElementalFields();
         foreach ($fields as $fieldName) {
@@ -44,14 +44,19 @@ class AutoPublishElementalExtension extends DataExtension
     private function autopublish(string $fieldName): void
     {
         // If the method doesn't exist, just quit.
-        var_dump($fieldName);
-        var_dump($this->getOwner()->HasMethod($fieldName));
         if (!$this->getOwner()->HasMethod($fieldName)) {
             return;
         }
 
         $elementArea = $this->getOwner()->{$fieldName}();
         $elementArea = $this->getOwner()->ElementalArea();
+
+        var_dump(ElementalArea::singleton()->baseTable());
+        die();
+        foreach (ElementalArea::get() as $area) {
+            var_dump($area->ID);
+        }
+
 
         if ($elementArea) {
             $elements = $elementArea->Elements();
@@ -60,7 +65,6 @@ class AutoPublishElementalExtension extends DataExtension
                 $element->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
             }
         }
-        die();
     }
 
     /**
@@ -92,5 +96,4 @@ class AutoPublishElementalExtension extends DataExtension
             $this->getOwner()->config()->get('auto_publish_elemental_disable') ?
             true : false;
     }
-
 }
