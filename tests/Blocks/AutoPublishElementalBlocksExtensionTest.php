@@ -15,36 +15,6 @@ class AutoPublishElementalBlocksExtensionTest extends SapphireTest
     /**
      * Make sure AutoPublishElementalFields default to `ElementalArea`.
      */
-    public function testAutoPublishElementalFields()
-    {
-        $config = DummyPage::config();
-
-        // Make sure AutoPublishElementalFields defaults to `['ElementalArea']`
-        $config->set('auto_publish_elemental_fields', null);
-        $dummy = new DummyPage();
-        $fields = $dummy->getAutoPublishElementalFields();
-        $this->assertEquals($fields, ['ElementalArea']);
-
-        $config->set('auto_publish_elemental_fields', []);
-        $dummy = new DummyPage();
-        $fields = $dummy->getAutoPublishElementalFields();
-        $this->assertEquals($fields, ['ElementalArea']);
-
-        // Make sure that any AutoPublishElementalFields string gets wrapped in an array.
-        $config->set('auto_publish_elemental_fields', 'AlternativeElementalName');
-        $dummy = new DummyPage();
-        $fields = $dummy->getAutoPublishElementalFields();
-        $this->assertEquals($fields, ['AlternativeElementalName']);
-
-        // Make sure that AutoPublishElementalFields handles array properly.
-        $config->set('auto_publish_elemental_fields', ['elementalOne', 'elementalTwo']);
-        $fields = $dummy->getAutoPublishElementalFields();
-        $this->assertEquals($fields, ['elementalOne', 'elementalTwo']);
-    }
-
-    /**
-     * Make sure AutoPublishElementalFields default to `ElementalArea`.
-     */
     public function testAutoPublishElementalDisable()
     {
         $config = DummyPage::config();
@@ -60,14 +30,56 @@ class AutoPublishElementalBlocksExtensionTest extends SapphireTest
         $this->assertTrue($dummy->getAutoPublishElementalDisable());
     }
 
+    /**
+     * Make sure child blocks are published after their parent page is published
+     */
     public function testOnAfterPublish()
     {
-        // Make sure all our object are fully saved to the DB
-        $this->objFromFixture(DummyElement::class, 'element1')->write();
-        $this->objFromFixture(DummyElement::class, 'element2')->write();
-        $this->objFromFixture(ElementalArea::class, 'area1')->write();
-        $page = $this->objFromFixture(DummyPage::class, 'page1')->write();
+        // Make sure our element has a published version
+        $block = $this->objFromFixture(DummyElement::class, 'element1');
+        $block->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE, false);
+        $blockV1 = $block->Version;
+
+        // Create a new version of our Elemental block
+        $block->TestValue = "New updated value";
+        $block->write();
+        $blockV2 = $block->Version;
+        $this->assertEquals($blockV1, $blockV2-1, 'When writting a block it should create a new version');
+
+        // Make sure Live and Stage Versions differ
+        $this->assertTrue($block->stagesDiffer(), 'The live block and staged block should be different.');
+
+        // Make a change to the page without publishing
         $page = $this->objFromFixture(DummyPage::class, 'page1');
+        $page->Title = 'Brand new title';
+        $page->write();
+
+        // The child block should still be unpublished
+        $live = Versioned::get_versionnumber_by_stage(DummyElement::class, 'Live', $block->ID);
+        $draft = Versioned::get_versionnumber_by_stage(DummyElement::class, 'Stage', $block->ID);
+        $this->assertNotEquals($live, $draft, "The Elemental block should still be unpulishedwith when its parent page gets a standard write.");
+
+        // Publish the parent page
+        $page->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE, false);
+
+        // Make sure the page is published
+        $live = Versioned::get_versionnumber_by_stage(DummyPage::class, 'Live', $page->ID);
+        $draft = Versioned::get_versionnumber_by_stage(DummyPage::class, 'Stage', $page->ID);
+        $this->assertEquals($live, $draft, "The Dummy Page block should have been published with its parent page.");
+
+        // Publishing the Parent page should have published the blocks underneat it
+        $live = Versioned::get_versionnumber_by_stage(DummyElement::class, 'Live', $block->ID);
+        $draft = Versioned::get_versionnumber_by_stage(DummyElement::class, 'Stage', $block->ID);
+        $this->assertEquals($live, $draft, "The Elemental block should have been published with its parent page.");
+    }
+
+    /**
+     * If auto_publish_elemental_disable is disable, no auto publish should occur.
+     */
+    public function testOnAfterPublishWithDisableAutoPublishing()
+    {
+        // Disable auto publishing
+        DummyPage::config()->set('auto_publish_elemental_disable', true);
 
         // Make sure our element has a published version
         $block = $this->objFromFixture(DummyElement::class, 'element1');
@@ -80,37 +92,30 @@ class AutoPublishElementalBlocksExtensionTest extends SapphireTest
         $blockV2 = $block->Version;
         $this->assertEquals($blockV1, $blockV2-1, 'When writting a block it should create a new version');
 
-        // Make sure we Live and Stage Versions differ
+        // Make sure Live and Stage Versions differ
         $this->assertTrue($block->stagesDiffer(), 'The live block and staged block should be different.');
 
-        // Publish the parent page
+        // Make a change to the page without publishing
         $page = $this->objFromFixture(DummyPage::class, 'page1');
-        var_dump(ElementalArea::singleton()->baseTable());
-        $page->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE, false);
+        $page->Title = 'Brand new title';
+        $page->write();
 
-        // Publishing the Parent page should have published the blocks underneat it
-        var_dump(ElementalArea::get()->Count());
-        die();
-
+        // The child block should still be unpublished
         $live = Versioned::get_versionnumber_by_stage(DummyElement::class, 'Live', $block->ID);
         $draft = Versioned::get_versionnumber_by_stage(DummyElement::class, 'Stage', $block->ID);
-        $this->assertEquals($live, $draft, "The Elemental block should have been published with its parent page.");
+        $this->assertNotEquals($live, $draft, "The Elemental block should still be unpulishedwith when its parent page gets a standard write.");
 
-        //     $thirdVersion = Versioned::get_latest_version(VersionedTest\TestObject::class, $page1->ID)->Version;
-    //     $liveVersion = Versioned::get_versionnumber_by_stage(VersionedTest\TestObject::class, 'Live', $page1->ID);
-    //     $stageVersion = Versioned::get_versionnumber_by_stage(VersionedTest\TestObject::class, 'Stage', $page1->ID);
-    //
-    //
-    //     $dummy = $this->objFromFixture(DummyPage::class, 'page1');
-    //     $dummy->Content = 'orig';
-    //     $dummy->write();
-    //
-    //     $firstVersion = $page1->Version;
-    //     $page1->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE, false);
-    //     $this->assertEquals(
-    //         $firstVersion,
-    //         $page1->Version,
-    //         'publish() with $createNewVersion=FALSE does not create a new version'
-    //     );
+        // Publish the parent page
+        $page->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE, false);
+
+        // Make sure the page is published
+        $live = Versioned::get_versionnumber_by_stage(DummyPage::class, 'Live', $page->ID);
+        $draft = Versioned::get_versionnumber_by_stage(DummyPage::class, 'Stage', $page->ID);
+        $this->assertEquals($live, $draft, "The Dummy Page block should have been published with its parent page.");
+
+        // Publishing the Parent page should have published the blocks underneat it
+        $live = Versioned::get_versionnumber_by_stage(DummyElement::class, 'Live', $block->ID);
+        $draft = Versioned::get_versionnumber_by_stage(DummyElement::class, 'Stage', $block->ID);
+        $this->assertNotEquals($live, $draft, "The Elemental block should not have been published with its parent page because auto publishing is disable.");
     }
 }
