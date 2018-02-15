@@ -17,8 +17,4 @@ class DummyElement extends BaseElement
     {
         return 'A test element';
     }
-
-    // private static $extensions = [
-    //     Versioned::class
-    // ];
 }
