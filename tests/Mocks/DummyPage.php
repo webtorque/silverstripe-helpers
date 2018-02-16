@@ -2,7 +2,6 @@
 namespace WebTorque\SilverstripeHelpers\Tests\Mocks;
 
 use DNADesign\Elemental\Extensions\ElementalPageExtension;
-use SilverStripe\CMS\Model\SiteTree;
 use WebTorque\SilverstripeHelpers\Blocks\AutoPublishElementalExtension;
 
 /**

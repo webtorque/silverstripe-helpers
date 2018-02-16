@@ -1,5 +1,6 @@
 <?php
 namespace WebTorque\SilverstripeHelpers\Tests\Mocks;
+
 use DNADesign\Elemental\Models\BaseElement;
 use SilverStripe\Versioned\Versioned;
 
@@ -16,8 +17,4 @@ class DummyElement extends BaseElement
     {
         return 'A test element';
     }
-
-    // private static $extensions = [
-    //     Versioned::class
-    // ];
 }
