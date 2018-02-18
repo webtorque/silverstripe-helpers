@@ -10,7 +10,7 @@
         "dnadesign/silverstripe-elemental": "2.x-dev",
         "silvershop/silverstripe-hasonefield": "2.*",
         "symbiote/silverstripe-gridfieldextensions": "^3.1",
-        "jonom/focuspoint": "3.x-dev",
+        "jonom/focuspoint": "dev-ss4-upgrade",
         "silverstripe/blog": "3.*",
         "tractorcow/silverstripe-colorpicker": "^4@dev"
     },
