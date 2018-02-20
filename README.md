@@ -8,3 +8,4 @@ This is a simple package we use internally to keep track of some common tricks w
 
 ## Feature
 * [Auto publishing elemental block](doc/block-autopublishing.md)
+* [Force SSL in live or test](doc/force-ssl.md)
