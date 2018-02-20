@@ -22,7 +22,10 @@
     "autoload": {
         "psr-4": {
             "WebTorque\\SilverstripeHelpers\\": "src/"
-        }
+        },
+        "files": [
+            "_config.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
