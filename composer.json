@@ -40,7 +40,7 @@
     },
     "scripts": {
         "lint": "vendor/bin/phpcs src/ tests/",
-        "localTest": "DB=SQLITE vendor/bin/phpunit"
+        "localTest": "DB=SQLITE PHPUNIT_TESTSUITE=true vendor/bin/phpunit"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
