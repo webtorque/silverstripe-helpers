@@ -1,0 +1,22 @@
+---
+Name: robots
+After:
+- '#rootroutes'
+---
+SilverStripe\Control\Director:
+  rules:
+    'robots.txt': WebTorque\SilverstripeHelpers\SEO\RobotsController
+WebTorque\SilverstripeHelpers\SEO\RobotsController:
+  defaults:
+    - "User-agent: *"
+    - "Disallow: /admin"
+    - "Disallow: /dev"
+    - "Disallow: /vendor"
+    - "Disallow: /*?flush=*"
+    - "Disallow: /*?stage=*"
+  dev:
+    - "User-agent: *"
+    - "Disallow: /"
+  test:
+    - "User-agent: *"
+    - "Disallow: /"
