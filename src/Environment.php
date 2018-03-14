@@ -17,7 +17,7 @@ class Environment
     {
         $dontForceSSL = SSEnvironment::getEnv('WT_DONT_FORCE_SSL') ?: false;
 
-        if (!$dontForceSSL && !Director::isDev()) {
+        if (!$dontForceSSL && !Director::isDev() && !Director::is_cli()) {
             Director::forceSSL();
         }
     }
